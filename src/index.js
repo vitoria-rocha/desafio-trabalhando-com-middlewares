@@ -15,17 +15,23 @@ function checksExistsUserAccount(request, response, next) {
   const usernameExists = users.find(user => username === user.username);
 
   if(!usernameExists) {
-    return response.status(404).json({error: 'user not found'})
+    return response.status(404).json({error: "User not found"})
   }
 
   request.user = usernameExists;
   return next();
-
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
-}
+  const { user } = request;
+  const { pro, todos } = user;
+
+  if(!pro && todos.length > 9){
+    return response.status(403).json({error: "Todo limit reached, subscribe to the PRO plan"})
+  }
+  //retorna permissao do usuario apenas se for free < 10 ou pro
+  return next()
+;}
 
 function checksTodoExists(request, response, next) {
   // Complete aqui
