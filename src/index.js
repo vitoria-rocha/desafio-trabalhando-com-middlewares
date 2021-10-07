@@ -10,7 +10,17 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  const usernameExists = users.find(user => username === user.username);
+
+  if(!usernameExists) {
+    return response.status(404).json({error: 'user not found'})
+  }
+
+  request.user = usernameExists;
+  return next();
+
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
@@ -109,6 +119,7 @@ app.patch('/todos/:id/done', checksTodoExists, (request, response) => {
 app.delete('/todos/:id', checksExistsUserAccount, checksTodoExists, (request, response) => {
   const { user, todo } = request;
 
+  //indexOf atribui um numero para o todo no arrays
   const todoIndex = user.todos.indexOf(todo);
 
   if (todoIndex === -1) {
