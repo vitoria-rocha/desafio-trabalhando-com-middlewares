@@ -12,7 +12,8 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
-  const usernameExists = users.find(user => username === user.username);
+  const usernameExists = users.find(user => user.username === username);
+  
   if(!usernameExists) {
     return response.status(404).json({error: "User not found"})
   }
@@ -25,29 +26,53 @@ function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
   const { pro, todos } = user;
 
-  if(!pro && todos.length > 9){
-    return response.status(403).json({error: "Todo limit reached, subscribe to the PRO plan"})
+  if(!pro && todos.length >=10){
+    return response.status(403).json({error: 'Todo limit reached, subscribe to the PRO plan'});
   }
   //retorna permissao do usuario apenas se for free < 10 ou pro
-  return next()
-;}
+  return next();
+}
 
 function checksTodoExists(request, response, next) {
   const { username } = request.headers;
   const { id } = request.params;
 
-  const todoExists = id.find(todos => id === todos.id);
+  const todoExists = id.find(todos => todos.id === id);
 
   if(!todoExists){
-    return response.status(400).json({error:"todo not found"});
+    return response.status(400).json({error:'todo not found'});
   }
 
+  const validateID = validate(id);
+
+  if(!validateID){
+    return response.status(400).json({error: 'ID not found'});
+  }
+
+  const usernameExists = users.find((user) => user.username === username);
+
+  if(!usernameExists) {
+    return response.status(404).json({error: 'User not found'});
+  }
+
+
   request.todoExists = todoExists;
+  request.user = usernameExists;
   return next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+  
+  const userIDExists = users.find(user => user.id === id);
+
+  if(!userIDExists){
+    return response.status(404).json({error: 'user not found'});
+  }
+
+  request.user = userIDExists;
+  return next();
+
 }
 
 app.post('/users', (request, response) => {
